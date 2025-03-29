@@ -7,6 +7,12 @@ const CustomSidenav: React.FC = () => {
   const controller = useMaterialUIController();
   const { sidenavColor, transparentSidenav, whiteSidenav, darkMode, sidenavType } = controller;
 
+  // Map "light" to "white" (or another valid value), or filter invalid values
+  const validSidenavType = 
+    sidenavType === "light" ? "white" : // convert "light" to "white"
+    ["dark", "white", "transparent"].includes(sidenavType as string) ? sidenavType : 
+    undefined;
+
   return (
     <Sidenav
       color={sidenavColor}
@@ -16,7 +22,7 @@ const CustomSidenav: React.FC = () => {
       transparent={transparentSidenav}
       white={whiteSidenav}
       darkMode={darkMode}
-      sidenavType={["dark", "transparent", "white"].includes(sidenavType) ? sidenavType : undefined}
+      sidenavType={validSidenavType}
     />
   );
 };

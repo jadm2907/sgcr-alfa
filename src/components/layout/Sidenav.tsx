@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { ForwardRefExoticComponent, RefAttributes } from 'react';
 import {
   Drawer,
   Box,
@@ -11,9 +11,10 @@ import {
   Tooltip,
   useTheme,
   styled,
-  Collapse
+  Collapse,
+  ListItemProps,
 } from '@mui/material';
-import { NavLink, useLocation } from 'react-router-dom';
+import { NavLink, NavLinkProps, useLocation, To } from 'react-router-dom';
 import { useMaterialUIController } from '../../contexts';
 import { useAuth } from '../../contexts/AuthContext';
 import MDBox from '../MDBox';
@@ -37,7 +38,7 @@ import logoDark from '../../assets/images/logo-small-dark.png';
 export interface RouteItem {
   key: string;
   name: string;
-  path: string;
+  path: To;
   icon: React.ReactNode;
   exact?: boolean;
   adminOnly?: boolean;
@@ -55,8 +56,8 @@ interface User {
 // Props del componente
 interface SidenavProps {
   color?: 'primary' | 'secondary' | 'info' | 'success' | 'warning' | 'error' | 'dark';
-  brand: string | React.ReactNode; // Permite string o un nodo React para la marca
-  brandName: string; // Agregamos la prop brandName
+  brand: string | React.ReactNode;
+  brandName: string;
   routes: RouteItem[];
   transparent?: boolean;
   white?: boolean;
@@ -67,8 +68,14 @@ interface SidenavProps {
   user?: User | null;
 }
 
-// Estilo personalizado para los items activos
-const ActiveListItem = styled(ListItem)(({ theme }) => ({
+// Definimos las props para el ListItem estilado
+interface StyledListItemProps extends ListItemProps {
+  component?: React.ElementType;
+  to?: To;
+}
+
+// Estilo personalizado para los items activos con tipado correcto
+const ActiveListItem = styled(ListItem)<StyledListItemProps>(({ theme }) => ({
   backgroundColor: theme.palette.primary.light,
   color: theme.palette.primary.main,
   '&:hover': {
@@ -79,10 +86,36 @@ const ActiveListItem = styled(ListItem)(({ theme }) => ({
   },
 }));
 
+// Componente personalizado para NavLink con forwardRef y tipado correcto
+const CustomNavLink = React.forwardRef<HTMLAnchorElement, NavLinkProps>((props, ref) => (
+  <NavLink
+    ref={ref}
+    {...props}
+    className={({ isActive }) =>
+      isActive ? `${props.className ?? ''} active`.trim() : `${props.className ?? ''}`.trim()
+    }
+    end
+  />
+));
+
+// Componente ListItemLink para manejar correctamente los tipos
+interface ListItemLinkProps extends ListItemProps {
+  to: To;
+}
+
+const ListItemLink = React.forwardRef<HTMLDivElement, ListItemLinkProps>(({ to, ...props }, ref) => (
+  <ListItem
+    ref={ref}
+    component={CustomNavLink}
+    to={to}
+    {...props}
+  />
+));
+
 const Sidenav: React.FC<SidenavProps> = ({
   color = 'primary',
   brand = logo,
-  brandName = 'SGCR-Alfa', // Valor por defecto para brandName
+  brandName = 'SGCR-Alfa',
   routes = [],
   transparent = false,
   white = false,
@@ -102,6 +135,12 @@ const Sidenav: React.FC<SidenavProps> = ({
   const { pathname } = useLocation();
   const theme = useTheme();
   const [openSubmenus, setOpenSubmenus] = React.useState<Record<string, boolean>>({});
+
+  // Validar el tipo de sidenav
+  const validSidenavType =
+    sidenavType === "white" ? "white" :
+    ["dark", "white", "transparent"].includes(sidenavType) ? sidenavType :
+    undefined;
 
   // Cerrar el sidenav en móvil al seleccionar una ruta
   const handleItemClick = () => {
@@ -124,19 +163,26 @@ const Sidenav: React.FC<SidenavProps> = ({
   const regularRoutes = filteredRoutes.filter(route => !route.bottom);
   const bottomRoutes = filteredRoutes.filter(route => route.bottom);
 
+  // Función para verificar si la ruta está activa
+  const isRouteActive = (path: To) => {
+    if (typeof path === 'string') {
+      return pathname === path || (path !== '/' && pathname.startsWith(path));
+    }
+    return pathname === path.pathname;
+  };
+
   // Renderizar los items del menú
   const renderNavItems = ({ items, depth = 0 }: { items: RouteItem[], depth?: number }) => {
     return items.map(({ key, name, path, icon, children }) => {
-      const isActive = pathname === path || (path !== '/' && pathname.startsWith(path));
+      const isActive = isRouteActive(path);
       const hasChildren = children && children.length > 0;
       const isSubmenuOpen = openSubmenus[key] || isActive;
 
       if (hasChildren) {
         return (
           <React.Fragment key={key}>
-            <ListItem
-              component={NavLink} // Usar NavLink para la navegación
-              to="#" // Puedes usar un enlace temporal o manejar el toggle programáticamente
+            <ListItemLink
+              to={path}
               onClick={() => handleSubmenuToggle(key)}
               sx={{
                 pl: depth > 0 ? theme.spacing(4) : theme.spacing(3),
@@ -161,7 +207,7 @@ const Sidenav: React.FC<SidenavProps> = ({
                   {isSubmenuOpen ? <ExpandLess /> : <ExpandMore />}
                 </>
               )}
-            </ListItem>
+            </ListItemLink>
             <Collapse in={miniSidenav ? false : isSubmenuOpen} timeout="auto" unmountOnExit>
               <List component="div" disablePadding>
                 {renderNavItems({ items: children || [], depth: depth + 1 })}
@@ -193,7 +239,7 @@ const Sidenav: React.FC<SidenavProps> = ({
           <Tooltip title={miniSidenav ? name : ''} placement="right">
             {isActive ? (
               <ActiveListItem
-                components={NavLink}
+                component={CustomNavLink}
                 to={path}
                 onClick={handleItemClick}
                 sx={{
@@ -204,8 +250,7 @@ const Sidenav: React.FC<SidenavProps> = ({
                 {listItemContent}
               </ActiveListItem>
             ) : (
-              <ListItem
-                component={NavLink}
+              <ListItemLink
                 to={path}
                 onClick={handleItemClick}
                 sx={{
@@ -217,7 +262,7 @@ const Sidenav: React.FC<SidenavProps> = ({
                 }}
               >
                 {listItemContent}
-              </ListItem>
+              </ListItemLink>
             )}
           </Tooltip>
         </Box>
@@ -230,7 +275,7 @@ const Sidenav: React.FC<SidenavProps> = ({
     if (typeof brand === 'string') {
       return (
         <img
-          src={darkMode ? brandDark : brand}
+          src={darkMode ? logoDark : logo}
           alt="Logo SGCR-Alfa"
           style={{
             width: miniSidenav ? 40 : 120,
@@ -240,7 +285,7 @@ const Sidenav: React.FC<SidenavProps> = ({
       );
     }
 
-    return brand; // Si brand es un nodo React
+    return brand;
   };
 
   return (
@@ -254,7 +299,7 @@ const Sidenav: React.FC<SidenavProps> = ({
             ? 'transparent'
             : darkMode
             ? theme.palette.background.default
-            : sidenavType === 'white'
+            : validSidenavType === 'white'
             ? theme.palette.background.paper
             : theme.palette.background.default,
           border: 'none',
@@ -287,6 +332,11 @@ const Sidenav: React.FC<SidenavProps> = ({
             }}
           >
             {renderBrand()}
+            {!miniSidenav && (
+              <MDTypography variant="h6" ml={2}>
+                {brandName}
+              </MDTypography>
+            )}
           </MDBox>
 
           {/* Menú de navegación principal */}
@@ -335,13 +385,13 @@ const Sidenav: React.FC<SidenavProps> = ({
                   <MDTypography
                     variant="button"
                     fontWeight="medium"
-                    color={darkMode ? 'white' : 'text.primary'}
+                    color={darkMode ? 'light' : 'text'}
                   >
                     {user.name}
                   </MDTypography>
                   <MDTypography
                     variant="caption"
-                    color={darkMode ? 'text.secondary' : 'text.secondary'}
+                    color={darkMode ? 'text' : 'text'}
                     display="block"
                   >
                     {user.role}

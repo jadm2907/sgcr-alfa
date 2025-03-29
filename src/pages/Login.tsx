@@ -42,7 +42,7 @@ const Login: React.FC = () => {
           SGCR-Alfa
         </MDTypography>
         <MDTypography variant="body2" textAlign="center" mb={3}>
-          Sistema de Gestión de Centros de Rehabilitación
+          Sistema Gestión Centros de Rehabilitación
         </MDTypography>
         {error && (
           <MDTypography color="error" textAlign="center" mb={2}>

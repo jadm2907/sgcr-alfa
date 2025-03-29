@@ -17,7 +17,7 @@ const MainLayout: React.FC = () => {
       <Sidenav
         color={sidenavColor}
         brand="SGCR-Alfa"
-        // brandName removed as it is not part of SidenavProps
+        brandName="SGCR-Alfa"
         routes={[]} // Aquí irán tus rutas
         // Removed transparent as it is not part of SidenavProps
         /* Removed white as it is not part of SidenavProps */

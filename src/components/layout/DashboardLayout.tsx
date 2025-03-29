@@ -12,8 +12,19 @@ interface DashboardLayoutProps {
   children?: React.ReactNode;
 }
 
+interface IMaterialUIController {
+  miniSidenav: boolean;
+  sidenavColor: string;
+  transparentSidenav: boolean;
+  whiteSidenav: boolean;
+  darkMode: boolean;
+  sidenavType: string;
+  layout: string;
+  [key: string]: any; // Para propiedades adicionales
+}
+
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
-  const [controller, dispatch] = useMaterialUIController();
+  const [controller, dispatch] = useMaterialUIController() as unknown as [IMaterialUIController, React.Dispatch<any>];
   const {
     miniSidenav,
     sidenavColor,
@@ -45,7 +56,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     if (isSmallScreen && miniSidenav === false) {
       setMiniSidenav(dispatch, true);
     }
-  }, [pathname, isSmallScreen, dispatch]);
+  }, [pathname, isSmallScreen, dispatch, miniSidenav]);
 
   // Configuración del layout principal
   const mainStyles = () => {
@@ -85,16 +96,24 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       
       {/* Sidenav */}
       <Sidenav
-        color={sidenavColor}
+        color={sidenavColor as "primary" | "secondary" | "info" | "success" | "warning" | "error" | "dark" | undefined}
         brand="SGCR-Alfa"
         brandName="Sistema de Gestión"
         routes={/* Tus rutas aquí */ []}
-        user={user ? { ...user, name: user.name || 'Guest', role: user.role || 'Guest' } : { name: 'Guest', role: 'Guest' }}
+        user={user ? { 
+          avatar: '',
+          name: user.name || 'Guest', 
+          role: user.role || 'Guest' 
+        } : { 
+          avatar: '',
+          name: 'Guest', 
+          role: 'Guest' 
+        }}
         transparent={transparentSidenav}
         white={whiteSidenav}
         miniSidenav={miniSidenav}
         darkMode={darkMode}
-        sidenavType={sidenavType}
+        sidenavType={['dark', 'transparent', 'white'].includes(sidenavType) ? sidenavType as "dark" | "transparent" | "white" : undefined}
         mobileView={mobileView}
       />
       

@@ -46,6 +46,11 @@ export const MaterialUIControllerProvider: React.FC<{ children: React.ReactNode 
   const [fixedSidenav, setFixedSidenav] = useState(true);
   const [layout, setLayout] = useState<IMaterialUIController['layout']>('dashboard');
 
+  const dispatch = (action: any, value: boolean) => {
+    // Implement the dispatch logic here if needed
+    console.log('Dispatch action:', action, 'with value:', value);
+  };
+
   return (
     <MaterialUIControllerContext.Provider
       value={{
@@ -72,6 +77,9 @@ export const MaterialUIControllerProvider: React.FC<{ children: React.ReactNode 
         setMiniSidenav,
         setFixedSidenav,
         setLayout,
+
+        // Dispatch
+        dispatch,
       }}
     >
       {children}
