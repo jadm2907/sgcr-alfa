@@ -1,12 +1,5 @@
 import React, { createContext, useContext, useState } from 'react';
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: 'admin' | 'staff';
-}
-
 interface AuthContextType {
   isAuthenticated: boolean;
   user: User | null;
@@ -14,39 +7,46 @@ interface AuthContextType {
   logout: () => void;
 }
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  role: 'admin' | 'staff';
+}
+
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
-
+  
   const login = async (email: string, password: string) => {
-    // Implementación de login sin useNavigate
-    try {
-      // Simulación de login exitoso
+    // Aquí iría tu lógica de autenticación real
+    if (email === 'admin@sgcr.com' && password === 'admin123') {
       setUser({
         id: '1',
-        name: 'Admin User',
-        email: email,
+        name: 'Administrador',
+        email: 'admin@sgcr.com',
         role: 'admin'
       });
-      return Promise.resolve();
-    } catch (error) {
-      return Promise.reject(error);
+      return;
     }
+    throw new Error('Credenciales inválidas');
   };
 
   const logout = () => {
     setUser(null);
   };
 
-  const value = {
-    isAuthenticated: !!user,
-    user,
-    login,
-    logout
-  };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={{
+      isAuthenticated: !!user,
+      user,
+      login,
+      logout
+    }}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
 export const useAuth = () => {

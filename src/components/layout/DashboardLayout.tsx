@@ -6,7 +6,7 @@ import DashboardNavbar from './DashboardNavbar';
 import Sidenav from '../layout/Sidenav';
 import Footer from '../layout/Footer';
 import { sidenavWidth, sidenavMiniWidth } from '../../theme/constants';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContextBAK';
 
 interface DashboardLayoutProps {
   children?: React.ReactNode;
