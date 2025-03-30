@@ -17,8 +17,8 @@ import {
 import { NavLink, NavLinkProps, useLocation, To } from 'react-router-dom';
 import { useMaterialUIController } from '../../contexts';
 import { useAuth } from '../../contexts/AuthContext';
-import MDBox from '../MDBox';
-import MDTypography from '../MDTypography';
+import MDBox from '../ui/MDBox';
+import MDTypography from '../ui/MDTypography';
 import ExitToApp from '@mui/icons-material/ExitToApp';
 import Home from '@mui/icons-material/Home';
 import People from '@mui/icons-material/People';

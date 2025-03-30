@@ -2,8 +2,8 @@ import React from 'react';
 import { AppBar, Toolbar, IconButton, Box } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { useMaterialUIController } from '../../contexts';
-import MDBox from '../MDBox';
-import MDTypography from '../MDTypography';
+import MDBox from '../ui/MDBox';
+import MDTypography from '../ui/MDTypography';
 import Breadcrumbs from './Breadcrumbs';
 
 interface IDashboardNavbarProps {

@@ -1,6 +1,6 @@
 import React from 'react';
-import MDBox from '../components/MDBox';
-import MDTypography from '../components/MDTypography';
+import MDBox from './ui/MDBox';
+import MDTypography from './ui/MDTypography';
 import Icon from '@mui/material/Icon';
 
 interface IStatisticsCardProps {

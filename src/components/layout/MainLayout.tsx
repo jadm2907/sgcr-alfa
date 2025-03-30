@@ -5,7 +5,7 @@ import DashboardLayout from './DashboardLayout';
 import Footer from './Footer';
 import Sidenav from './Sidenav';
 import { useMaterialUIController } from '../../contexts';
-import MDBox from '../MDBox'; // Adjust the path based on the actual location of MDBox
+import MDBox from '../ui/MDBox'; // Adjust the path based on the actual location of MDBox
 
 const MainLayout: React.FC = () => {
   const controller = useMaterialUIController();

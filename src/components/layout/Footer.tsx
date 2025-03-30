@@ -1,6 +1,6 @@
 import React from 'react';
-import MDBox from '../MDBox';
-import MDTypography from '../MDTypography';
+import MDBox from '../ui/MDBox';
+import MDTypography from '../ui/MDTypography';
 
 const Footer: React.FC = () => {
   return (

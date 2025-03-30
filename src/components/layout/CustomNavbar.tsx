@@ -1,8 +1,8 @@
 import React from 'react';
 import { useAuth } from '../../contexts/AuthContext';
-import MDBox from '/home/debian/Documentos/sgcr-alfa/src/components/MDBox'; // Ensure the file '../MDBox' exists or update the path to the correct location
-import MDTypography from '/home/debian/Documentos/sgcr-alfa/src/components/MDTypography';
-import MDButton from '/home/debian/Documentos/sgcr-alfa/src/components/MDButton';
+import MDBox from '../ui/MDBox'; // Ensure the file '../MDBox' exists or update the path to the correct location
+import MDTypography from '../ui/MDTypography';
+import MDButton from '../ui/MDButton';
 import DashboardNavbar from '/home/debian/Documentos/sgcr-alfa/src/components/layout/DashboardNavbar';
 
 const CustomNavbar: React.FC = () => {

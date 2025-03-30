@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link, Typography, Box } from '@mui/material';
 import { useLocation } from 'react-router-dom';
-import MDBox from '../MDBox';
-import MDTypography from '../MDTypography';
+import MDBox from '../ui/MDBox';
+import MDTypography from '../ui/MDTypography';
 
 const Breadcrumbs: React.FC = () => {
   const location = useLocation();

@@ -1,8 +1,8 @@
 // components/FormikInput.tsx
 import React from 'react';
 import { Field } from 'formik';
-import MDInput from '../components/MDInput';
-import MDBox from '../components/MDBox';
+import MDInput from './ui/MDInput';
+import MDBox from './ui/MDBox';
 
 interface FormikInputProps {
   name: string;

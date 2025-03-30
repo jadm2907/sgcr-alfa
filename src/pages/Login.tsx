@@ -1,9 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import MDBox from '../components/MDBox';
-import MDTypography from '../components/MDTypography';
-import MDButton from '../components/MDButton';
+import MDBox from '../components/ui/MDBox';
+import MDTypography from '../components/ui/MDTypography';
+import MDButton from '../components/ui/MDButton';
 import Card from '@mui/material/Card';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';

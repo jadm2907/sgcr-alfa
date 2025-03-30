@@ -1,12 +1,12 @@
 import React from 'react';
-import MDBox from '../components/MDBox';
-import MDTypography from '../components/MDTypography';
+import MDBox from '../components/ui/MDBox';
+import MDTypography from '../components/ui/MDTypography';
 import Card from '@mui/material/Card';
 import DashboardLayout from '../components/layout/DashboardLayout';
 import DashboardNavbar from '../components/layout/DashboardNavbar';
 import Footer from '../components/layout/Footer';
 import DataTable from '../components/DataTable';
-import MDButton from '../components/MDButton';
+import MDButton from '../components/ui/MDButton';
 import { useState as reactUseState } from 'react';
 
 interface ITratamiento {
