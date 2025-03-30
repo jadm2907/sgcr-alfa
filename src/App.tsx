@@ -4,7 +4,7 @@ import { ThemeProvider } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
 import { AuthProvider } from './contexts/AuthContext'; // Corregí el nombre del archivo
 import theme from './theme';
-import AppRoutes from './routes';
+import AppRoutes from './routes/AppRoutes';
 
 const App: React.FC = () => {
   return (
