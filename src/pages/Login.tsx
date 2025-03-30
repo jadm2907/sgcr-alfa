@@ -10,12 +10,12 @@ import Box from '@mui/material/Box';
 import bgImage from '../assets/images/bg-sign-in-basic.jpeg';
 import GoogleIcon from '@mui/icons-material/Google';
 import MicrosoftIcon from '@mui/icons-material/Microsoft';
-import { Typography, Stack, useTheme, CircularProgress } from '@mui/material';
+import { Typography, Stack, useTheme, CircularProgress, Snackbar, Alert } from '@mui/material';
 import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import FormikInput from '../components/FormikInput';
 
-// Esquema de validación para login
+// Esquemas de validación (se mantienen igual)
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email('Correo electrónico inválido')
@@ -27,7 +27,6 @@ const loginSchema = Yup.object().shape({
     .required('La contraseña es requerida')
 });
 
-// Esquema de validación para registro
 const registerSchema = Yup.object().shape({
   name: Yup.string()
     .min(3, 'El nombre debe tener al menos 3 caracteres')
@@ -48,6 +47,11 @@ const registerSchema = Yup.object().shape({
 const Login: React.FC = () => {
   const [activeTab, setActiveTab] = React.useState<'login' | 'register'>('login');
   const [socialLoginError, setSocialLoginError] = React.useState('');
+  const [snackbar, setSnackbar] = React.useState({
+    open: false,
+    message: '',
+    severity: 'success' as 'success' | 'error'
+  });
   
   const theme = useTheme();
   const { login } = useAuth();
@@ -56,9 +60,19 @@ const Login: React.FC = () => {
   const handleLoginSubmit = async (values: { email: string; password: string }, { setSubmitting, setErrors }: any) => {
     try {
       await login(values.email, values.password);
+      setSnackbar({
+        open: true,
+        message: 'Inicio de sesión exitoso',
+        severity: 'success'
+      });
       navigate('/dashboard');
     } catch (err) {
       setErrors({ password: 'Credenciales incorrectas' });
+      setSnackbar({
+        open: true,
+        message: 'Error en las credenciales',
+        severity: 'error'
+      });
     } finally {
       setSubmitting(false);
     }
@@ -66,20 +80,42 @@ const Login: React.FC = () => {
 
   const handleRegisterSubmit = async (values: any, { setSubmitting, setErrors }: any) => {
     try {
+      // Simulación de llamada API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
       console.log('Registrando usuario:', values);
-      setSocialLoginError('');
-      alert('Registro exitoso! Por favor inicia sesión.');
+      setSnackbar({
+        open: true,
+        message: 'Registro exitoso! Por favor inicia sesión.',
+        severity: 'success'
+      });
       setActiveTab('login');
     } catch (err) {
       setErrors({ email: 'Error al registrar el usuario' });
+      setSnackbar({
+        open: true,
+        message: 'Error al registrar el usuario',
+        severity: 'error'
+      });
     } finally {
       setSubmitting(false);
     }
   };
 
+  const handleCloseSnackbar = () => {
+    setSnackbar(prev => ({ ...prev, open: false }));
+  };
+
   const handleSocialLogin = (provider: string) => {
-    console.log(`Autenticando con ${provider}`);
     setSocialLoginError(`Redirigiendo a ${provider}`);
+  };
+
+  const handlePasswordRecovery = () => {
+    setSnackbar({
+      open: true,
+      message: 'Se ha enviado un enlace de recuperación a tu correo',
+      severity: 'success'
+    });
   };
 
   return (
@@ -102,7 +138,7 @@ const Login: React.FC = () => {
         backdropFilter: 'blur(8px)',
         backgroundColor: 'rgba(255, 255, 255, 0.9)'
       }}>
-        {/* Mensaje de bienvenida */}
+        {/* Encabezado */}
         <Box textAlign="center" mb={4}>
           <Typography variant="h4" fontWeight="bold" color="primary">
             Bienvenido
@@ -112,7 +148,7 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
 
-        {/* Tabs para cambiar entre login y registro */}
+        {/* Switch entre Login y Registro */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Stack direction="row" spacing={2}>
             <MDButton
@@ -189,12 +225,14 @@ const Login: React.FC = () => {
                     name="email"
                     label="Correo electrónico"
                     type="email"
+                    disabled={isSubmitting}
                   />
                   
                   <FormikInput
                     name="password"
                     label="Contraseña"
                     type="password"
+                    disabled={isSubmitting}
                   />
                   
                   <MDButton 
@@ -212,8 +250,11 @@ const Login: React.FC = () => {
                     <Typography 
                       component="span" 
                       color="primary" 
-                      sx={{ cursor: 'pointer' }}
-                      onClick={() => alert('Funcionalidad de recuperación de contraseña')}
+                      sx={{ 
+                        cursor: 'pointer',
+                        '&:hover': { textDecoration: 'underline' }
+                      }}
+                      onClick={handlePasswordRecovery}
                     >
                       ¿Olvidaste tu contraseña?
                     </Typography>
@@ -239,24 +280,28 @@ const Login: React.FC = () => {
                     name="name"
                     label="Nombre completo"
                     type="text"
+                    disabled={isSubmitting}
                   />
                   
                   <FormikInput
                     name="email"
                     label="Correo electrónico"
                     type="email"
+                    disabled={isSubmitting}
                   />
                   
                   <FormikInput
                     name="password"
                     label="Contraseña"
                     type="password"
+                    disabled={isSubmitting}
                   />
                   
                   <FormikInput
                     name="confirmPassword"
                     label="Confirmar contraseña"
                     type="password"
+                    disabled={isSubmitting}
                   />
                   
                   <MDButton 
@@ -287,6 +332,22 @@ const Login: React.FC = () => {
           </Box>
         )}
       </Card>
+
+      {/* Snackbar para feedback */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </MDBox>
   );
 };
