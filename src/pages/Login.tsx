@@ -1,67 +1,85 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import MDBox from '../components/MDBox';
 import MDTypography from '../components/MDTypography';
-import MDInput from '../components/MDInput';
 import MDButton from '../components/MDButton';
 import Card from '@mui/material/Card';
-import Grid from '@mui/material/Grid';
 import Divider from '@mui/material/Divider';
 import Box from '@mui/material/Box';
 import bgImage from '../assets/images/bg-sign-in-basic.jpeg';
 import GoogleIcon from '@mui/icons-material/Google';
 import MicrosoftIcon from '@mui/icons-material/Microsoft';
-import LinkedInIcon from '@mui/icons-material/LinkedIn';
-import FacebookIcon from '@mui/icons-material/Facebook';
-import EmailIcon from '@mui/icons-material/Email';
-import { Typography, Stack, useTheme } from '@mui/material';
+import { Typography, Stack, useTheme, CircularProgress } from '@mui/material';
+import { Formik, Form } from 'formik';
+import * as Yup from 'yup';
+import FormikInput from '../components/FormikInput';
+
+// Esquema de validación para login
+const loginSchema = Yup.object().shape({
+  email: Yup.string()
+    .email('Correo electrónico inválido')
+    .required('El correo electrónico es requerido'),
+  password: Yup.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .matches(/[A-Z]/, 'Debe contener al menos una mayúscula')
+    .matches(/[0-9]/, 'Debe contener al menos un número')
+    .required('La contraseña es requerida')
+});
+
+// Esquema de validación para registro
+const registerSchema = Yup.object().shape({
+  name: Yup.string()
+    .min(3, 'El nombre debe tener al menos 3 caracteres')
+    .required('El nombre completo es requerido'),
+  email: Yup.string()
+    .email('Correo electrónico inválido')
+    .required('El correo electrónico es requerido'),
+  password: Yup.string()
+    .min(8, 'La contraseña debe tener al menos 8 caracteres')
+    .matches(/[A-Z]/, 'Debe contener al menos una mayúscula')
+    .matches(/[0-9]/, 'Debe contener al menos un número')
+    .required('La contraseña es requerida'),
+  confirmPassword: Yup.string()
+    .oneOf([Yup.ref('password'), undefined], 'Las contraseñas deben coincidir')
+    .required('Debes confirmar tu contraseña')
+});
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loginError, setLoginError] = useState('');
-  const [registerName, setRegisterName] = useState('');
-  const [registerEmail, setRegisterEmail] = useState('');
-  const [registerPassword, setRegisterPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [registerError, setRegisterError] = useState('');
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = React.useState<'login' | 'register'>('login');
+  const [socialLoginError, setSocialLoginError] = React.useState('');
   
   const theme = useTheme();
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleLoginSubmit = async (values: { email: string; password: string }, { setSubmitting, setErrors }: any) => {
     try {
-      await login(email, password);
+      await login(values.email, values.password);
       navigate('/dashboard');
     } catch (err) {
-      setLoginError('Credenciales incorrectas');
+      setErrors({ password: 'Credenciales incorrectas' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const handleRegisterSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (registerPassword !== confirmPassword) {
-      setRegisterError('Las contraseñas no coinciden');
-      return;
-    }
-    
+  const handleRegisterSubmit = async (values: any, { setSubmitting, setErrors }: any) => {
     try {
-      console.log('Registrando usuario:', { registerName, registerEmail, registerPassword });
-      setRegisterError('');
+      console.log('Registrando usuario:', values);
+      setSocialLoginError('');
       alert('Registro exitoso! Por favor inicia sesión.');
       setActiveTab('login');
     } catch (err) {
-      setRegisterError('Error al registrar el usuario');
+      setErrors({ email: 'Error al registrar el usuario' });
+    } finally {
+      setSubmitting(false);
     }
   };
 
   const handleSocialLogin = (provider: string) => {
     console.log(`Autenticando con ${provider}`);
-    alert(`Redirigiendo a proveedor de autenticación: ${provider}`);
+    setSocialLoginError(`Redirigiendo a ${provider}`);
   };
 
   return (
@@ -84,6 +102,7 @@ const Login: React.FC = () => {
         backdropFilter: 'blur(8px)',
         backgroundColor: 'rgba(255, 255, 255, 0.9)'
       }}>
+        {/* Mensaje de bienvenida */}
         <Box textAlign="center" mb={4}>
           <Typography variant="h4" fontWeight="bold" color="primary">
             Bienvenido
@@ -93,6 +112,7 @@ const Login: React.FC = () => {
           </Typography>
         </Box>
 
+        {/* Tabs para cambiar entre login y registro */}
         <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
           <Stack direction="row" spacing={2}>
             <MDButton
@@ -116,77 +136,91 @@ const Login: React.FC = () => {
           </Stack>
         </Box>
 
+        {socialLoginError && (
+          <MDTypography color="error" textAlign="center" mb={2}>
+            {socialLoginError}
+          </MDTypography>
+        )}
+
         {activeTab === 'login' ? (
           <Box>
-            {loginError && (
-              <MDTypography color="error" textAlign="center" mb={2}>
-                {loginError}
-              </MDTypography>
-            )}
-            
-            <Stack spacing={2} mb={3}>
-              <MDButton 
-                customVariant="outlined"
-                fullWidth 
-                startIcon={<GoogleIcon />}
-                onClick={() => handleSocialLogin('google')}
-                sx={{ 
-                  backgroundColor: 'white',
-                  color: 'text.primary',
-                  '&:hover': { backgroundColor: '#f5f5f5' }
-                }}
-              >
-                Continuar con Google
-              </MDButton>
-              
-              <MDButton 
-                customVariant="outlined"
-                fullWidth 
-                startIcon={<MicrosoftIcon />}
-                onClick={() => handleSocialLogin('microsoft')}
-                sx={{ 
-                  backgroundColor: 'white',
-                  color: 'text.primary',
-                  '&:hover': { backgroundColor: '#f5f5f5' }
-                }}
-              >
-                Continuar con Microsoft
-              </MDButton>
-            </Stack>
-            
-            <Divider sx={{ my: 2 }}>
-              <Typography variant="body2" color="text.secondary">o usa tu email</Typography>
-            </Divider>
-            
-            <form onSubmit={handleLoginSubmit}>
-              <MDBox mb={2}>
-                <MDInput
-                  type="email"
-                  label="Correo electrónico"
-                  fullWidth
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </MDBox>
-              <MDBox mb={3}>
-                <MDInput
-                  type="password"
-                  label="Contraseña"
-                  fullWidth
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-              </MDBox>
-              <MDButton 
-                type="submit" 
-                customVariant="contained"
-                customColor="primary"
-                fullWidth
-                sx={{ mb: 2, height: 48 }}
-              >
-                Iniciar sesión
-              </MDButton>
-            </form>
+            <Formik
+              initialValues={{ email: '', password: '' }}
+              validationSchema={loginSchema}
+              onSubmit={handleLoginSubmit}
+            >
+              {({ isSubmitting }) => (
+                <Form>
+                  <Stack spacing={2} mb={3}>
+                    <MDButton 
+                      customVariant="outlined"
+                      fullWidth 
+                      startIcon={<GoogleIcon />}
+                      onClick={() => handleSocialLogin('google')}
+                      sx={{ 
+                        backgroundColor: 'white',
+                        color: 'text.primary',
+                        '&:hover': { backgroundColor: '#f5f5f5' }
+                      }}
+                    >
+                      Continuar con Google
+                    </MDButton>
+                    
+                    <MDButton 
+                      customVariant="outlined"
+                      fullWidth 
+                      startIcon={<MicrosoftIcon />}
+                      onClick={() => handleSocialLogin('microsoft')}
+                      sx={{ 
+                        backgroundColor: 'white',
+                        color: 'text.primary',
+                        '&:hover': { backgroundColor: '#f5f5f5' }
+                      }}
+                    >
+                      Continuar con Microsoft
+                    </MDButton>
+                  </Stack>
+                  
+                  <Divider sx={{ my: 2 }}>
+                    <Typography variant="body2" color="text.secondary">o usa tu email</Typography>
+                  </Divider>
+                  
+                  <FormikInput
+                    name="email"
+                    label="Correo electrónico"
+                    type="email"
+                  />
+                  
+                  <FormikInput
+                    name="password"
+                    label="Contraseña"
+                    type="password"
+                  />
+                  
+                  <MDButton 
+                    type="submit" 
+                    customVariant="contained"
+                    customColor="primary"
+                    fullWidth
+                    sx={{ mb: 2, height: 48 }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Iniciar sesión'}
+                  </MDButton>
+                  
+                  <Typography variant="body2" textAlign="center" mt={2}>
+                    <Typography 
+                      component="span" 
+                      color="primary" 
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => alert('Funcionalidad de recuperación de contraseña')}
+                    >
+                      ¿Olvidaste tu contraseña?
+                    </Typography>
+                  </Typography>
+                </Form>
+              )}
+            </Formik>
           </Box>
         ) : (
           <Box>
@@ -194,71 +228,62 @@ const Login: React.FC = () => {
               Únete a nuestra comunidad
             </Typography>
             
-            {registerError && (
-              <MDTypography color="error" textAlign="center" mb={2}>
-                {registerError}
-              </MDTypography>
-            )}
-            
-            <form onSubmit={handleRegisterSubmit}>
-              <MDBox mb={2}>
-                <MDInput
-                  type="text"
-                  label="Nombre completo"
-                  fullWidth
-                  value={registerName}
-                  onChange={(e) => setRegisterName(e.target.value)}
-                />
-              </MDBox>
-              <MDBox mb={2}>
-                <MDInput
-                  type="email"
-                  label="Correo electrónico"
-                  fullWidth
-                  value={registerEmail}
-                  onChange={(e) => setRegisterEmail(e.target.value)}
-                />
-              </MDBox>
-              <MDBox mb={2}>
-                <MDInput
-                  type="password"
-                  label="Contraseña"
-                  fullWidth
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                />
-              </MDBox>
-              <MDBox mb={3}>
-                <MDInput
-                  type="password"
-                  label="Confirmar contraseña"
-                  fullWidth
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                />
-              </MDBox>
-              <MDButton 
-                type="submit" 
-                customVariant="contained"
-                customColor="primary"
-                fullWidth
-                sx={{ height: 48 }}
-              >
-                Registrarse
-              </MDButton>
-            </form>
-            
-            <Typography variant="body2" textAlign="center" mt={3} color="text.secondary">
-              ¿Ya tienes una cuenta?{' '}
-              <Typography 
-                component="span" 
-                color="primary" 
-                sx={{ cursor: 'pointer' }}
-                onClick={() => setActiveTab('login')}
-              >
-                Inicia sesión
-              </Typography>
-            </Typography>
+            <Formik
+              initialValues={{ name: '', email: '', password: '', confirmPassword: '' }}
+              validationSchema={registerSchema}
+              onSubmit={handleRegisterSubmit}
+            >
+              {({ isSubmitting }) => (
+                <Form>
+                  <FormikInput
+                    name="name"
+                    label="Nombre completo"
+                    type="text"
+                  />
+                  
+                  <FormikInput
+                    name="email"
+                    label="Correo electrónico"
+                    type="email"
+                  />
+                  
+                  <FormikInput
+                    name="password"
+                    label="Contraseña"
+                    type="password"
+                  />
+                  
+                  <FormikInput
+                    name="confirmPassword"
+                    label="Confirmar contraseña"
+                    type="password"
+                  />
+                  
+                  <MDButton 
+                    type="submit" 
+                    customVariant="contained"
+                    customColor="primary"
+                    fullWidth
+                    sx={{ height: 48 }}
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? <CircularProgress size={24} color="inherit" /> : 'Registrarse'}
+                  </MDButton>
+                  
+                  <Typography variant="body2" textAlign="center" mt={3} color="text.secondary">
+                    ¿Ya tienes una cuenta?{' '}
+                    <Typography 
+                      component="span" 
+                      color="primary" 
+                      sx={{ cursor: 'pointer' }}
+                      onClick={() => setActiveTab('login')}
+                    >
+                      Inicia sesión
+                    </Typography>
+                  </Typography>
+                </Form>
+              )}
+            </Formik>
           </Box>
         )}
       </Card>
